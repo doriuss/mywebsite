@@ -2,10 +2,24 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>דומיין למכירה</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --concrete: #dfe3e6;
+      --board: #23272c;
+      --tile-top: #343a40;
+      --tile-bottom: #2c3136;
+      --hinge: #15181b;
+      --flap-text: #f2efe6;
+      --signal: #ffcc00;
+      --ink: #23272c;
+      --muted: #4f5a63;
+    }
+
     * { box-sizing: border-box; }
 
     body {
@@ -14,137 +28,360 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f1f5f9;
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      padding: 24px 16px;
+      color: var(--ink);
+      font-family: "IBM Plex Sans Hebrew", Arial, sans-serif;
     }
 
-    .wrapper {
-      max-width: 550px;
+    main {
       width: 100%;
+      max-width: 680px;
     }
 
-    /* אזור השמיים מעל הכרטיס */
-    .sky {
-      position: relative;
-      height: 90px;
-      overflow: hidden;
-    }
-
-    .plane {
+    .sr-only {
       position: absolute;
-      top: 20px;
+      width: 1px; height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    /* ---------- רקע: נוף מחלון הטרמינל ---------- */
+    .scene {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      background: linear-gradient(#8fbbe0 0%, #c9dcea 52%, #eef1f1 70%, #6b7378 70%, #50575c 100%);
+    }
+
+    /* קו המסלול על הקרקע */
+    .runway {
+      position: absolute;
+      inset-inline: 0;
+      top: 80%;
+      height: 3px;
+      background: repeating-linear-gradient(90deg, #f2efe6 0 40px, transparent 40px 80px);
+      opacity: 0.6;
+    }
+
+    /* מסגרת חלון הטרמינל */
+    .frame {
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 220px, #2a2f34 220px 232px),
+        linear-gradient(transparent 28%, #2a2f34 28%, #2a2f34 calc(28% + 10px), transparent calc(28% + 10px));
+      box-shadow: inset 0 0 0 14px #2a2f34;
+    }
+
+    /* מטוס רחוק עם שובל */
+    .jet {
+      position: absolute;
+      top: 16%;
+      left: -420px;
       direction: ltr;
       display: flex;
       align-items: center;
-      animation: fly 9s linear infinite;
+      opacity: 0.8;
+      animation: cross 40s linear infinite;
     }
 
-    .plane-inner {
-      display: flex;
-      align-items: center;
-      animation: bob 1.6s ease-in-out infinite alternate;
+    .contrail {
+      width: 260px;
+      height: 3px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, transparent, #ffffffcc);
     }
 
-    .banner {
-      background: #fbbf24;
-      color: #172b4d;
-      font-weight: bold;
-      font-size: 15px;
-      padding: 8px 14px;
-      border-radius: 4px;
-      white-space: nowrap;
-      box-shadow: 0 4px 10px #00000015;
-    }
+    .jet svg { width: 54px; height: 34px; }
 
-    .rope {
-      width: 30px;
-      height: 2px;
-      background: #94a3b8;
-    }
-
-    @keyframes fly {
-      from { left: -280px; }
+    @keyframes cross {
+      from { left: -420px; }
       to   { left: 100%; }
     }
 
-    @keyframes bob {
-      from { transform: translateY(-5px); }
-      to   { transform: translateY(5px); }
+    /* ---------- לוח ההמראות ---------- */
+    .board {
+      background: var(--board);
+      border-radius: 6px 6px 0 0;
+      padding: 22px 22px 26px;
+      box-shadow:
+        0 1px 0 #ffffff14 inset,
+        0 24px 48px -20px #23272c99;
+    }
+
+    .board-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--flap-text);
+      padding-bottom: 16px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ffffff1f;
+    }
+
+    .board-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+
+    .board-title svg { width: 30px; height: 30px; }
+
+    .clock {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--signal);
+      font-variant-numeric: tabular-nums;
+      direction: ltr;
+    }
+
+    .field + .field { margin-top: 18px; }
+
+    .field-label {
+      display: block;
+      font-size: 0.9rem;
+      color: #9aa4ad;
+      margin-bottom: 8px;
+    }
+
+    .flaps {
+      display: grid;
+      grid-template-columns: repeat(var(--n, 10), minmax(0, 1fr));
+      gap: 4px;
+      max-width: calc(var(--n, 10) * 52px);
+    }
+
+    .flaps.ltr { direction: ltr; }
+
+    .tile {
+      position: relative;
+      aspect-ratio: 3 / 4;
+      border-radius: 3px;
+      background: linear-gradient(var(--tile-top) 50%, var(--tile-bottom) 50%);
+      container-type: inline-size;
+      perspective: 200px;
+      overflow: hidden;
+    }
+
+    /* קו הציר באמצע כל משבצת */
+    .tile::after {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      top: 50%;
+      height: 1px;
+      background: var(--hinge);
+    }
+
+    .ch {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 72cqw;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--flap-text);
+      transform-origin: center;
+    }
+
+    .status .ch { color: var(--signal); }
+
+    .ch.flip { animation: flap 80ms ease-out; }
+
+    @keyframes flap {
+      from { transform: rotateX(80deg); filter: brightness(0.6); }
+      to   { transform: none; filter: none; }
+    }
+
+    /* ---------- טקסט וכפתור ---------- */
+    .details {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 18px 22px;
+      background: var(--flap-text);
+      border-radius: 0 0 6px 6px;
+      box-shadow: 0 24px 48px -20px #23272c99;
+    }
+
+    .details p {
+      margin: 0;
+      max-width: 34ch;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .cta {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 15px 26px;
+      border: 0;
+      border-radius: 4px;
+      background: var(--signal);
+      color: var(--ink);
+      font: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .cta svg { width: 20px; height: 20px; }
+
+    .cta:hover { background: #f0bd00; }
+
+    .cta:focus-visible {
+      outline: 3px solid var(--ink);
+      outline-offset: 3px;
+    }
+
+    @media (max-width: 520px) {
+      .board { padding: 16px 14px 20px; }
+      .flaps { gap: 3px; }
+      .details { flex-direction: column; align-items: stretch; text-align: center; }
+      .details p { max-width: none; }
+      .cta { justify-content: center; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .plane { animation: none; left: 50%; transform: translateX(-50%); }
-      .plane-inner { animation: none; }
+      .ch.flip { animation: none; }
+      .jet { animation: none; left: 10%; }
     }
-
-    .card {
-      background: white;
-      padding: 55px 35px;
-      border-radius: 20px;
-      text-align: center;
-      width: 100%;
-      box-shadow: 0 10px 35px #00000012;
-    }
-
-    h1 { color: #172b4d; }
-    p { color: #64748b; line-height: 1.8; }
-
-    a {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 14px 32px;
-      background: #2563eb;
-      color: white;
-      text-decoration: none;
-      border-radius: 10px;
-    }
-
-    a:hover { background: #1d4ed8; }
   </style>
 </head>
 <body>
-  <div class="wrapper">
-
-    <!-- המטוס -->
-    <div class="sky" aria-hidden="true">
-      <div class="plane">
-        <div class="plane-inner">
-          <div class="banner">✨ למכירה! ✨</div>
-          <div class="rope"></div>
-          <svg width="70" height="44" viewBox="0 0 70 44">
-            <!-- כנף עליונה (מאחורי הגוף) -->
-            <path d="M30 15 L42 15 L37 2 L31 2Z" fill="#1d4ed8"/>
-            <!-- זנב אנכי -->
-            <path d="M8 14 L4 3 H13 L20 14Z" fill="#1d4ed8"/>
-            <!-- גוף המטוס -->
-            <path d="M5 20 Q5 14 14 14 H52 Q66 14 68 20 Q66 26 52 26 H14 Q5 26 5 20Z" fill="#2563eb"/>
-            <!-- תא טייס -->
-            <path d="M56 15 Q63 15 65 19 H56Z" fill="#bfdbfe"/>
-            <!-- חלונות -->
-            <circle cx="36" cy="19" r="2" fill="white"/>
-            <circle cx="43" cy="19" r="2" fill="white"/>
-            <circle cx="50" cy="19" r="2" fill="white"/>
-            <!-- כנף זנב אופקית -->
-            <path d="M6 21 L16 21 L12 28 L5 28Z" fill="#1d4ed8"/>
-            <!-- כנף תחתונה -->
-            <path d="M28 21 L42 21 L35 38 L27 38Z" fill="#1d4ed8"/>
-          </svg>
-        </div>
-      </div>
+  <div class="scene" aria-hidden="true">
+    <div class="jet">
+      <div class="contrail"></div>
+      <svg viewBox="0 0 70 44" fill="#2a2f34">
+        <path d="M30 15 L42 15 L37 2 L31 2Z"/>
+        <path d="M8 14 L4 3 H13 L20 14Z"/>
+        <path d="M5 20 Q5 14 14 14 H52 Q66 14 68 20 Q66 26 52 26 H14 Q5 26 5 20Z"/>
+        <path d="M56 15.5 Q63 15.5 65 19 H56Z" fill="#c9dcea"/>
+        <circle cx="22" cy="18.5" r="1.6" fill="#c9dcea"/>
+        <circle cx="28" cy="18.5" r="1.6" fill="#c9dcea"/>
+        <circle cx="34" cy="18.5" r="1.6" fill="#c9dcea"/>
+        <circle cx="40" cy="18.5" r="1.6" fill="#c9dcea"/>
+        <circle cx="46" cy="18.5" r="1.6" fill="#c9dcea"/>
+        <circle cx="52" cy="18.5" r="1.6" fill="#c9dcea"/>
+        <path d="M28 21 L42 21 L35 38 L27 38Z"/>
+      </svg>
     </div>
-
-    <div class="card">
-      <h1>🌐 הדומיין הזה יכול להיות שלך!</h1>
-      <p>הדומיין זמין לרכישה.</p>
-      <p>לפרטים נוספים ולהצעות מחיר,
-         ניתן ליצור קשר.</p>
-
-      <a href="mailto:your@email.com">
-        ✉️ יצירת קשר
-      </a>
-    </div>
-
+    <div class="runway"></div>
+    <div class="frame"></div>
   </div>
+
+  <main>
+    <h1 class="sr-only" id="sr-title">הדומיין הזה למכירה</h1>
+
+    <section class="board" aria-hidden="true">
+      <div class="board-head">
+        <div class="board-title">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+          </svg>
+          המראות
+        </div>
+        <div class="clock" id="clock">--:--</div>
+      </div>
+
+      <div class="field">
+        <span class="field-label">יעד</span>
+        <div class="flaps ltr" id="destination"></div>
+      </div>
+
+      <div class="field status">
+        <span class="field-label">סטטוס</span>
+        <div class="flaps" id="status"></div>
+      </div>
+    </section>
+
+    <div class="details">
+      <p>הדומיין הזה זמין לרכישה. שלחו הצעת מחיר במייל ונחזור אליכם.</p>
+      <button class="cta" id="contact-btn" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="5" width="18" height="14" rx="2"/>
+          <path d="m3 7 9 6 9-6"/>
+        </svg>
+        שליחת הצעה
+      </button>
+    </div>
+  </main>
+
+  <script>
+    // ---------- שם הדומיין ----------
+    const host = 'israfly.co.il';
+    document.getElementById('sr-title').textContent = 'הדומיין ' + host + ' למכירה';
+
+    // ---------- לוח מתחלף ----------
+    const LATIN = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-';
+    const HEBREW = 'אבגדהוזחטיכלמנסעפצקרשת';
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function setChar(ch, c) {
+      ch.textContent = c;
+      ch.classList.remove('flip');
+      void ch.offsetWidth; // מאפס את האנימציה
+      ch.classList.add('flip');
+    }
+
+    function flipRow(el, text, charset, startDelay) {
+      const chars = [...text];
+      el.style.setProperty('--n', chars.length);
+      el.innerHTML = '';
+
+      chars.forEach((target, i) => {
+        const tile = document.createElement('span');
+        tile.className = 'tile';
+        const ch = document.createElement('span');
+        ch.className = 'ch';
+        tile.appendChild(ch);
+        el.appendChild(tile);
+
+        if (reduceMotion) { ch.textContent = target; return; }
+
+        let spins = 8 + Math.floor(Math.random() * 10);
+        setTimeout(function tick() {
+          if (spins-- > 0) {
+            setChar(ch, charset[Math.floor(Math.random() * charset.length)]);
+            setTimeout(tick, 75);
+          } else {
+            setChar(ch, target);
+          }
+        }, startDelay + i * 60);
+      });
+    }
+
+    flipRow(document.getElementById('destination'), host.toUpperCase(), LATIN, 200);
+    flipRow(document.getElementById('status'), 'למכירה', HEBREW, 900);
+
+    // ---------- שעון ----------
+    const clock = document.getElementById('clock');
+    function updateClock() {
+      clock.textContent = new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    }
+    updateClock();
+    setInterval(updateClock, 10000);
+
+    // ---------- יצירת קשר עם הגנה מפני בוטים ----------
+    // החלף בכתובת שלך, כתובה הפוך (למשל david -> divad)
+    document.getElementById('contact-btn').addEventListener('click', function () {
+      const user = 'ruoy'.split('').reverse().join('');
+      const domain = 'moc.liame'.split('').reverse().join('');
+      const subject = 'הצעה לדומיין ' + host;
+      window.location.href =
+        'mailto:' + user + '@' + domain + '?subject=' + encodeURIComponent(subject);
+    });
+  </script>
 </body>
 </html>
