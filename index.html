@@ -660,6 +660,12 @@
     const contactPanel = document.getElementById('contact-panel');
     const contactForm = document.getElementById('contact-form');
 
+    // ניקוי הטופס בחזרה לעמוד, כולל באמצעות כפתור Back.
+    window.addEventListener('pageshow', function () {
+      contactForm.reset();
+      document.getElementById('form-status').textContent = '';
+    });
+
     contactButton.addEventListener('click', function () {
       const opening = contactPanel.hidden;
 
